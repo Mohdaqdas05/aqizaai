@@ -1,0 +1,14 @@
+{
+  "name": "aqizaai",
+  "version": "1.0.0",
+  "description": "AQIZA AI - A ChatGPT-like AI platform",
+  "private": true,
+  "scripts": {
+    "dev:backend": "cd backend && npm run dev",
+    "dev:frontend": "cd frontend && npm run dev",
+    "install:backend": "cd backend && npm install",
+    "install:frontend": "cd frontend && npm install",
+    "install:all": "npm run install:backend && npm run install:frontend",
+    "build:frontend": "cd frontend && npm run build"
+  }
+}
