@@ -21,6 +21,8 @@ export default function AuthCallback() {
     }
 
     try {
+      // Clean the URL immediately so the token is not in browser history
+      window.history.replaceState({}, '', '/dashboard')
       tokenStorage.setToken(token)
       if (userRaw) {
         const user = JSON.parse(decodeURIComponent(userRaw))

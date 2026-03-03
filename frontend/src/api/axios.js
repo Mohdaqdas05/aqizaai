@@ -70,7 +70,7 @@ api.interceptors.response.use(
       } catch (refreshError) {
         processQueue(refreshError, null)
         tokenStorage.clear()
-        window.location.href = '/login'
+        window.location.replace('/login')
         return Promise.reject(refreshError)
       } finally {
         isRefreshing = false

@@ -24,6 +24,8 @@ const verifyCsrfOrigin = (req, res, next) => {
     if (process.env.NODE_ENV === 'production') {
       return res.status(403).json({ error: 'CSRF check failed: missing origin' });
     }
+    // In development: allow but warn so it's not forgotten
+    console.warn('[CSRF] Allowing request without Origin/Referer header in development mode');
     return next();
   }
 

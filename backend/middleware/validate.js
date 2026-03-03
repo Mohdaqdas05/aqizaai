@@ -26,7 +26,7 @@ const validateLogin = respond(
 
 const validateChat = respond(
   Joi.object({
-    message: Joi.string().min(1).required(),
+    content: Joi.string().min(1).required(),
     model:   Joi.string().optional(),
   })
 );

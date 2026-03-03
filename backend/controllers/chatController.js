@@ -117,7 +117,7 @@ const sendMessage = async (req, res) => {
   const userPlan = req.user.plan || 'free';
 
   try {
-    const { message } = req.body;
+    const { content: message } = req.body;
     let { model } = req.body;
 
     // Validate chat ownership

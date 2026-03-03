@@ -31,7 +31,7 @@ router.get('/', (req, res) => {
   const allowed = plans[userPlan] || plans.free;
   const available = models.filter((m) => allowed.includes(m.id));
 
-  return res.json({ data: { models: available, plan: userPlan } });
+  return res.json({ models: available, plan: userPlan });
 });
 
 module.exports = router;
