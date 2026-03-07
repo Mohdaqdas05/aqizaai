@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route } from 'react-router-dom'
+import { HashRouter, Routes, Route } from 'react-router-dom'
 import { ToastProvider } from './context/ToastContext'
 import { AuthProvider } from './context/AuthContext'
 import ProtectedRoute from './components/ProtectedRoute'
@@ -15,7 +15,7 @@ import NotFound from './pages/NotFound'
 
 export default function App() {
   return (
-    <BrowserRouter>
+    <HashRouter>
       <ToastProvider>
         <AuthProvider>
           <ErrorBoundary>
@@ -46,6 +46,6 @@ export default function App() {
           <Toast />
         </AuthProvider>
       </ToastProvider>
-    </BrowserRouter>
+    </HashRouter>
   )
 }
