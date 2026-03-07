@@ -1,6 +1,9 @@
+import { useState } from 'react'
+import { Copy, ThumbsUp, ThumbsDown, RefreshCw, Check } from 'lucide-react'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 import CodeBlock from './CodeBlock'
+import { useAuth } from '../context/AuthContext'
 
 function formatTime(iso) {
   if (!iso) return ''
@@ -14,38 +17,56 @@ function formatTime(iso) {
 export default function MessageBubble({ message }) {
   const isUser = message.role === 'user'
   const { content, createdAt, isStreaming, error } = message
+  const [copied, setCopied] = useState(false)
+  const { user } = useAuth()
 
-  const avatarLetter = isUser ? 'U' : 'A'
+  const avatarLetter = isUser
+    ? (user?.name?.[0]?.toUpperCase() || user?.email?.[0]?.toUpperCase() || 'U')
+    : 'A'
+
+  const handleCopy = async () => {
+    try {
+      await navigator.clipboard.writeText(content || '')
+      setCopied(true)
+      setTimeout(() => setCopied(false), 2000)
+    } catch {
+      // clipboard not available
+    }
+  }
+
+  if (isUser) {
+    return (
+      <div className="flex items-start gap-3 justify-end group animate-fade-in">
+        <div className="max-w-[72%] flex flex-col items-end">
+          <p className="text-sm text-txt-primary leading-relaxed whitespace-pre-wrap break-words text-right">
+            {content}
+          </p>
+          <span className="text-xs text-txt-muted opacity-0 group-hover:opacity-100 transition-opacity mt-1">
+            {formatTime(createdAt)}
+          </span>
+        </div>
+        <div className="w-8 h-8 rounded-full bg-brand-500/80 flex items-center justify-center text-white font-semibold text-xs flex-shrink-0 mt-0.5">
+          {avatarLetter}
+        </div>
+      </div>
+    )
+  }
 
   return (
-    <div
-      className={`flex gap-3 group animate-fade-in ${isUser ? 'flex-row-reverse' : 'flex-row'}`}
-    >
+    <div className="flex items-start gap-3 group animate-fade-in">
       {/* Avatar */}
-      <div
-        className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0 mt-1 ${
-          isUser
-            ? 'bg-brand-500 text-white'
-            : 'bg-gradient-to-br from-purple-600 to-indigo-600 text-white'
-        }`}
-      >
-        {avatarLetter}
+      <div className="w-8 h-8 rounded-full bg-gradient-to-br from-purple-600 to-indigo-600 flex items-center justify-center text-white font-bold text-xs flex-shrink-0 mt-0.5">
+        A
       </div>
 
-      {/* Bubble */}
-      <div
-        className={`flex flex-col gap-1 max-w-[72%] ${isUser ? 'items-end' : 'items-start'}`}
-      >
+      {/* Content */}
+      <div className="flex-1 min-w-0">
         <div
-          className={`px-4 py-3 rounded-2xl text-sm leading-relaxed ${
-            isUser
-              ? 'bg-brand-500 text-white rounded-tr-sm'
-              : error
-              ? 'bg-red-900/30 border border-red-800 text-red-200 rounded-tl-sm'
-              : 'bg-surface-card border border-border text-txt-primary rounded-tl-sm'
+          className={`text-sm leading-relaxed ${
+            error ? 'text-red-300' : 'text-txt-primary'
           }`}
         >
-          {isUser ? (
+          {error ? (
             <p className="whitespace-pre-wrap break-words">{content}</p>
           ) : (
             <div className="prose-dark prose prose-sm max-w-none">
@@ -76,10 +97,43 @@ export default function MessageBubble({ message }) {
           )}
         </div>
 
-        {/* Timestamp */}
-        <span className="text-xs text-txt-muted opacity-0 group-hover:opacity-100 transition-opacity px-1">
-          {formatTime(createdAt)}
-        </span>
+        {/* Action row — shown on hover, hidden while streaming */}
+        {!isStreaming && (
+          <div className="flex items-center gap-0.5 mt-2 opacity-0 group-hover:opacity-100 transition-opacity">
+            <button
+              onClick={handleCopy}
+              className="p-1.5 rounded-lg hover:bg-surface-hover text-txt-muted hover:text-txt-secondary transition-colors"
+              aria-label="Copy message"
+            >
+              {copied ? (
+                <Check className="w-3.5 h-3.5 text-green-400" />
+              ) : (
+                <Copy className="w-3.5 h-3.5" />
+              )}
+            </button>
+            <button
+              className="p-1.5 rounded-lg hover:bg-surface-hover text-txt-muted hover:text-txt-secondary transition-colors"
+              aria-label="Thumbs up"
+            >
+              <ThumbsUp className="w-3.5 h-3.5" />
+            </button>
+            <button
+              className="p-1.5 rounded-lg hover:bg-surface-hover text-txt-muted hover:text-txt-secondary transition-colors"
+              aria-label="Thumbs down"
+            >
+              <ThumbsDown className="w-3.5 h-3.5" />
+            </button>
+            <button
+              className="p-1.5 rounded-lg hover:bg-surface-hover text-txt-muted hover:text-txt-secondary transition-colors"
+              aria-label="Regenerate response"
+            >
+              <RefreshCw className="w-3.5 h-3.5" />
+            </button>
+            <span className="text-xs text-txt-muted ml-1">
+              {formatTime(createdAt)}
+            </span>
+          </div>
+        )}
       </div>
     </div>
   )
