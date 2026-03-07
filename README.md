@@ -95,6 +95,44 @@ App will be available at http://localhost:5173
 
 ## Deployment
 
-**Frontend:** Deploy `frontend/` to Vercel  
-**Backend:** Deploy `backend/` to Railway or Fly.io  
-**Database:** Supabase (PostgreSQL)
+### Method 1: Docker Compose (Self-hosted / VPS)
+
+```bash
+# Clone the repo
+git clone https://github.com/Mohdaqdas05/aqizaai.git
+cd aqizaai
+
+# Create .env from template
+cp .env.example .env
+# Edit .env with your values (especially OPENROUTER_API_KEY)
+
+# Start all services
+docker compose up -d
+
+# App available at:
+# Frontend: http://localhost:3000
+# Backend:  http://localhost:5000
+# Health:   http://localhost:5000/health
+```
+
+### Method 2: Render.com (Recommended — Free Tier)
+
+1. Fork this repo
+2. Go to https://render.com and sign in with GitHub
+3. Click "New" → "Blueprint" → select your forked repo
+4. Render reads `render.yaml` and creates all services automatically
+5. Set `OPENROUTER_API_KEY` and `FRONTEND_URL` in the Render dashboard
+6. Initialize the database: connect to the Render PostgreSQL shell and run `backend/models/schema.sql`
+
+### Method 3: Vercel (Frontend) + Railway (Backend + DB)
+
+1. **Frontend on Vercel**:
+   - Import the repo on Vercel
+   - Set root directory to `frontend`
+   - Add env var: `VITE_API_URL` = your Railway backend URL + `/api`
+2. **Backend on Railway**:
+   - Create a new project on Railway
+   - Add PostgreSQL plugin
+   - Deploy from GitHub, set root directory to `backend`
+   - Add all required env vars from `backend/.env.example`
+   - Run `schema.sql` via Railway's database shell
