@@ -1,10 +1,20 @@
 const openrouterProvider = require('./providers/openrouter.provider');
+const openaiProvider = require('./providers/openai.provider');
+const geminiProvider = require('./providers/gemini.provider');
 
 /**
- * Select the appropriate provider for a given model ID.
- * Currently all models are routed through OpenRouter.
+ * Determine which provider to use for a given model ID.
+ *
+ * Routing rules (checked in order):
+ *  - Models prefixed with 'direct-openai/' → OpenAI direct API
+ *  - Models prefixed with 'direct-gemini/' → Gemini direct API
+ *  - All other models → OpenRouter
  */
-const selectProvider = (_model) => openrouterProvider;
+const selectProvider = (model) => {
+  if (model.startsWith('direct-openai/')) return openaiProvider;
+  if (model.startsWith('direct-gemini/')) return geminiProvider;
+  return openrouterProvider;
+};
 
 /**
  * Stream an AI completion using the appropriate provider.
