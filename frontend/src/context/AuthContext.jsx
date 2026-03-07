@@ -24,7 +24,7 @@ export function AuthProvider({ children }) {
     api
       .get('/auth/me')
       .then((res) => {
-        const userData = res.data?.user || res.data
+        const userData = res.data?.data || res.data?.user || res.data
         setUser(userData)
         tokenStorage.setUser(userData)
       })
@@ -37,8 +37,8 @@ export function AuthProvider({ children }) {
 
   const login = useCallback(async (email, password) => {
     const res = await api.post('/auth/login', { email, password })
-    const { access_token, token, user: userData } = res.data
-    const jwt = access_token || token
+    const { accessToken, access_token, token, user: userData } = res.data.data || res.data
+    const jwt = accessToken || access_token || token
     tokenStorage.setToken(jwt)
     tokenStorage.setUser(userData)
     setUser(userData)
@@ -52,8 +52,8 @@ export function AuthProvider({ children }) {
 
   const register = useCallback(async (name, email, password) => {
     const res = await api.post('/auth/register', { name, email, password })
-    const { access_token, token, user: userData } = res.data
-    const jwt = access_token || token
+    const { accessToken, access_token, token, user: userData } = res.data.data || res.data
+    const jwt = accessToken || access_token || token
     tokenStorage.setToken(jwt)
     tokenStorage.setUser(userData)
     setUser(userData)

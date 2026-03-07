@@ -23,7 +23,7 @@ export function ChatProvider({ children }) {
   const fetchChats = useCallback(async () => {
     try {
       const res = await api.get('/chats')
-      setChats(res.data?.chats || res.data || [])
+      setChats(res.data?.data || res.data?.chats || res.data || [])
     } catch (err) {
       console.error('fetchChats error:', err)
     }
@@ -31,7 +31,7 @@ export function ChatProvider({ children }) {
 
   const createChat = useCallback(async () => {
     const res = await api.post('/chats')
-    const newChat = res.data?.chat || res.data
+    const newChat = res.data?.data || res.data?.chat || res.data
     setChats((prev) => [newChat, ...prev])
     setCurrentChat(newChat)
     setMessages([])
@@ -42,8 +42,8 @@ export function ChatProvider({ children }) {
     setIsLoading(true)
     try {
       const res = await api.get(`/chats/${chatId}`)
-      const chatData = res.data?.chat || res.data
-      const chatMessages = res.data?.messages || chatData?.messages || []
+      const chatData = res.data?.data || res.data?.chat || res.data
+      const chatMessages = chatData?.messages || []
       setCurrentChat(chatData)
       setMessages(chatMessages)
     } catch (err) {
