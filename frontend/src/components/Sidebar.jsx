@@ -6,6 +6,7 @@ import {
   ChevronRight,
   PenSquare,
   Search,
+  Code2,
   Image,
   Grid2x2,
   Folder,
@@ -15,7 +16,6 @@ import {
   Sun,
   Moon,
   LogOut,
-  User,
   MoreHorizontal,
 } from 'lucide-react'
 import { useLocalStorage } from '../hooks/useLocalStorage'
@@ -50,6 +50,7 @@ function Tooltip({ label, children, disabled }) {
 }
 
 const NAV_ITEMS = [
+  { icon: Code2,   label: 'Codex'    },
   { icon: Image,   label: 'Images'   },
   { icon: Grid2x2, label: 'Apps'     },
   { icon: Folder,  label: 'Projects' },
@@ -184,6 +185,7 @@ export default function Sidebar() {
         {NAV_ITEMS.map(({ icon: Icon, label }) => (
           <Tooltip key={label} label={label} disabled={isExpanded}>
             <button
+              title={label}
               className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-txt-secondary hover:text-txt-primary hover:bg-surface-hover transition-colors text-sm ${
                 !isExpanded ? 'justify-center' : ''
               }`}
