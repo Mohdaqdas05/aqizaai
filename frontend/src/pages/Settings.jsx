@@ -675,7 +675,7 @@ function SecuritySection({ user, addToast }) {
   )
 }
 
-function DataSection({ user, updateUser, addToast, onAccountDeleted }) {
+function DataSection({ user, updateUser, addToast }) {
   const [saveChatHistory, setSaveChatHistory] = useLocalStorage('save_chat_history', true)
   const [showDeleteChatsModal, setShowDeleteChatsModal] = useState(false)
   const [showDeleteAccountModal, setShowDeleteAccountModal] = useState(false)
@@ -805,11 +805,11 @@ const TABS = [
 
 export default function Settings() {
   const [activeTab, setActiveTab] = useState('general')
-  const { user, updateUser, logout } = useAuth()
+  const { user, updateUser } = useAuth()
   const { addToast } = useToast()
   const navigate = useNavigate()
 
-  const sectionProps = { user, updateUser, addToast, logout, navigate }
+  const sectionProps = { user, updateUser, addToast }
 
   const renderSection = () => {
     switch (activeTab) {

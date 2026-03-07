@@ -289,24 +289,29 @@ const updateProfile = async (req, res) => {
 const updateSettings = async (req, res) => {
   try {
     const { theme, language, notifications_enabled, memory_enabled } = req.body;
-    const updates = [];
+    const columns = [];
     const values = [];
     let idx = 1;
 
-    if (theme !== undefined)                  { updates.push(`theme = $${idx++}`);                  values.push(theme); }
-    if (language !== undefined)               { updates.push(`language = $${idx++}`);               values.push(language); }
-    if (notifications_enabled !== undefined)  { updates.push(`notifications_enabled = $${idx++}`);  values.push(notifications_enabled); }
-    if (memory_enabled !== undefined)         { updates.push(`memory_enabled = $${idx++}`);         values.push(memory_enabled); }
+    if (theme !== undefined)                  { columns.push({ col: 'theme',                  val: theme }); }
+    if (language !== undefined)               { columns.push({ col: 'language',               val: language }); }
+    if (notifications_enabled !== undefined)  { columns.push({ col: 'notifications_enabled',  val: notifications_enabled }); }
+    if (memory_enabled !== undefined)         { columns.push({ col: 'memory_enabled',         val: memory_enabled }); }
 
-    if (updates.length === 0) {
+    if (columns.length === 0) {
       return res.status(400).json({ error: 'No settings to update' });
     }
 
-    values.push(req.user.id);
+    columns.forEach(({ val }) => values.push(val));
+    const setClauses      = columns.map(({ col }) => `${col} = $${idx++}`).join(', ');
+    const colNames        = columns.map(({ col }) => col).join(', ');
+    const valPlaceholders = columns.map((_, i) => `$${i + 1}`).join(', ');
+
+    values.push(req.user.id); // $idx = user_id
     await query(
-      `INSERT INTO user_settings (user_id, ${updates.map((u) => u.split(' ')[0]).join(', ')})
-       VALUES ($${idx}, ${values.slice(0, -1).map((_, i) => `$${i + 1}`).join(', ')})
-       ON CONFLICT (user_id) DO UPDATE SET ${updates.join(', ')}, updated_at = NOW()`,
+      `INSERT INTO user_settings (user_id, ${colNames})
+       VALUES ($${idx}, ${valPlaceholders})
+       ON CONFLICT (user_id) DO UPDATE SET ${setClauses}, updated_at = NOW()`,
       values
     );
 
@@ -325,7 +330,12 @@ const updateSettings = async (req, res) => {
 
 const deleteAccount = async (req, res) => {
   try {
-    await query('DELETE FROM users WHERE id = $1', [req.user.id]);
+    const userId = req.user.id;
+    // Delete related data in dependency order before removing the user
+    await query('DELETE FROM user_settings WHERE user_id = $1', [userId]);
+    await query('DELETE FROM refresh_tokens WHERE user_id = $1', [userId]);
+    await query('DELETE FROM chats WHERE user_id = $1', [userId]);
+    await query('DELETE FROM users WHERE id = $1', [userId]);
     res.clearCookie('refreshToken', { path: '/api/auth' });
     return res.json({ message: 'Account deleted' });
   } catch (err) {
