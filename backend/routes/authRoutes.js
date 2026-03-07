@@ -14,6 +14,8 @@ const {
   logout,
   me,
   updateProfile,
+  updateSettings,
+  deleteAccount,
 } = require('../controllers/authController');
 
 router.post('/register', verifyCsrfOrigin, authLimiter, validateRegister, register);
@@ -34,5 +36,7 @@ router.post('/refresh', verifyCsrfOrigin, refresh);
 router.post('/logout',  verifyCsrfOrigin, logout);
 router.get('/me',           authenticateToken, me);
 router.put('/profile',      verifyCsrfOrigin, authenticateToken, updateProfile);
+router.put('/settings',     verifyCsrfOrigin, authenticateToken, updateSettings);
+router.delete('/account',   verifyCsrfOrigin, authenticateToken, deleteAccount);
 
 module.exports = router;

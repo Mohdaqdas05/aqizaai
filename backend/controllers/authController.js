@@ -233,7 +233,7 @@ const me = async (req, res) => {
 
 const updateProfile = async (req, res) => {
   try {
-    const { name, avatar_url } = req.body;
+    const { name, avatar_url, currentPassword, newPassword } = req.body;
     const updates = [];
     const values  = [];
     let idx = 1;
@@ -245,6 +245,25 @@ const updateProfile = async (req, res) => {
     if (avatar_url !== undefined) {
       updates.push(`avatar_url = $${idx++}`);
       values.push(avatar_url);
+    }
+
+    // Password change: verify current password, then hash new one
+    if (newPassword !== undefined) {
+      if (!currentPassword) {
+        return res.status(400).json({ error: 'Current password is required' });
+      }
+      const userResult = await query('SELECT password_hash FROM users WHERE id = $1', [req.user.id]);
+      const userRow = userResult.rows[0];
+      if (!userRow || !userRow.password_hash) {
+        return res.status(400).json({ error: 'Password change not available for this account' });
+      }
+      const isValid = await bcrypt.compare(currentPassword, userRow.password_hash);
+      if (!isValid) {
+        return res.status(400).json({ error: 'Current password is incorrect' });
+      }
+      const newHash = await bcrypt.hash(newPassword, SALT_ROUNDS);
+      updates.push(`password_hash = $${idx++}`);
+      values.push(newHash);
     }
 
     if (updates.length === 0) {
@@ -267,4 +286,52 @@ const updateProfile = async (req, res) => {
   }
 };
 
-module.exports = { register, login, googleCallback, refresh, logout, me, updateProfile };
+const updateSettings = async (req, res) => {
+  try {
+    const { theme, language, notifications_enabled, memory_enabled } = req.body;
+    const updates = [];
+    const values = [];
+    let idx = 1;
+
+    if (theme !== undefined)                  { updates.push(`theme = $${idx++}`);                  values.push(theme); }
+    if (language !== undefined)               { updates.push(`language = $${idx++}`);               values.push(language); }
+    if (notifications_enabled !== undefined)  { updates.push(`notifications_enabled = $${idx++}`);  values.push(notifications_enabled); }
+    if (memory_enabled !== undefined)         { updates.push(`memory_enabled = $${idx++}`);         values.push(memory_enabled); }
+
+    if (updates.length === 0) {
+      return res.status(400).json({ error: 'No settings to update' });
+    }
+
+    values.push(req.user.id);
+    await query(
+      `INSERT INTO user_settings (user_id, ${updates.map((u) => u.split(' ')[0]).join(', ')})
+       VALUES ($${idx}, ${values.slice(0, -1).map((_, i) => `$${i + 1}`).join(', ')})
+       ON CONFLICT (user_id) DO UPDATE SET ${updates.join(', ')}, updated_at = NOW()`,
+      values
+    );
+
+    const result = await query(
+      `SELECT u.*, s.theme, s.language, s.notifications_enabled, s.memory_enabled
+       FROM users u LEFT JOIN user_settings s ON s.user_id = u.id
+       WHERE u.id = $1`,
+      [req.user.id]
+    );
+    return res.json({ message: 'Settings updated', data: safeUser(result.rows[0]) });
+  } catch (err) {
+    console.error('updateSettings error:', err);
+    return res.status(500).json({ error: 'Failed to update settings' });
+  }
+};
+
+const deleteAccount = async (req, res) => {
+  try {
+    await query('DELETE FROM users WHERE id = $1', [req.user.id]);
+    res.clearCookie('refreshToken', { path: '/api/auth' });
+    return res.json({ message: 'Account deleted' });
+  } catch (err) {
+    console.error('deleteAccount error:', err);
+    return res.status(500).json({ error: 'Failed to delete account' });
+  }
+};
+
+module.exports = { register, login, googleCallback, refresh, logout, me, updateProfile, updateSettings, deleteAccount };

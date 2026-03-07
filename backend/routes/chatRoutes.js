@@ -11,6 +11,7 @@ const {
   deleteChat,
   updateChatTitle,
   sendMessage,
+  deleteAllChats,
 } = require('../controllers/chatController');
 
 // All chat routes require authentication
@@ -18,6 +19,7 @@ router.use(authenticateToken);
 
 router.get('/',                getChats);
 router.post('/',               createChat);
+router.delete('/all',          deleteAllChats);
 router.get('/:id',             getChat);
 router.delete('/:id',          deleteChat);
 router.patch('/:id/title',     updateChatTitle);
