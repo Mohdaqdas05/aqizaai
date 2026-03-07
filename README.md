@@ -95,6 +95,31 @@ App will be available at http://localhost:5173
 
 ## Deployment
 
-**Frontend:** Deploy `frontend/` to Vercel  
-**Backend:** Deploy `backend/` to Railway or Fly.io  
+### Frontend — GitHub Pages
+
+The frontend is automatically deployed to GitHub Pages at:  
+**https://Mohdaqdas05.github.io/aqizaai/**
+
+Deployment triggers on every push to `main` that changes files under `frontend/`.
+
+To enable GitHub Pages:
+1. Go to **Settings → Pages**
+2. Set **Source** to **GitHub Actions**
+
+### Backend CI
+
+The backend CI workflow runs on every push to `main` and on pull requests that change files under `backend/`. It installs dependencies and runs a health-check smoke test against the server.
+
+### Required GitHub Secrets
+
+Configure the following secret in **Settings → Secrets and variables → Actions**:
+
+| Secret | Description |
+|--------|-------------|
+| `VITE_API_URL` | Production backend API URL (e.g. `https://your-app.onrender.com/api`) |
+
+### Local / Self-Hosted Deployment
+
+**Frontend:** Deploy `frontend/` to Vercel or GitHub Pages  
+**Backend:** Deploy `backend/` to Railway, Render, or Fly.io  
 **Database:** Supabase (PostgreSQL)
