@@ -39,11 +39,11 @@ export default function ModelSelector({ value, onChange }) {
     <div ref={ref} className="relative">
       <button
         onClick={() => setOpen((v) => !v)}
-        className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-surface-card border border-border text-sm text-txt-secondary hover:text-txt-primary hover:border-brand-500/40 transition-colors"
+        className="flex items-center gap-1 text-sm font-medium text-txt-primary hover:bg-surface-hover px-2 py-1 rounded-lg transition-colors"
         aria-haspopup="listbox"
         aria-expanded={open}
       >
-        <span className="font-medium text-txt-primary">{current?.name || 'Select model'}</span>
+        <span>{current?.name || 'Select model'}</span>
         <motion.span animate={{ rotate: open ? 180 : 0 }} transition={{ duration: 0.2 }}>
           <ChevronDown className="w-3.5 h-3.5" />
         </motion.span>
@@ -57,7 +57,7 @@ export default function ModelSelector({ value, onChange }) {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -6 }}
             transition={{ duration: 0.15 }}
-            className="absolute bottom-full mb-2 left-0 min-w-[180px] bg-surface-card border border-border rounded-xl shadow-2xl overflow-hidden z-50 py-1"
+            className="absolute bottom-full mb-2 left-0 min-w-[200px] bg-surface-card border border-border rounded-xl shadow-2xl overflow-hidden z-50 py-1"
           >
             {models.map((model) => {
               const id = model.id || model._id
@@ -71,15 +71,27 @@ export default function ModelSelector({ value, onChange }) {
                     onChange(id)
                     setOpen(false)
                   }}
-                  className={`flex items-center justify-between px-4 py-2.5 text-sm cursor-pointer transition-colors ${
+                  className={`flex items-center justify-between px-4 py-2.5 cursor-pointer transition-colors ${
                     isSelected
                       ? 'text-brand-400 bg-brand-500/10'
                       : 'text-txt-secondary hover:text-txt-primary hover:bg-surface-hover'
                   }`}
                 >
-                  <span>{model.name}</span>
+                  <div className="flex flex-col min-w-0">
+                    <span className="text-sm">{model.name}</span>
+                    {model.description && (
+                      <span className="text-xs text-txt-muted mt-0.5 truncate max-w-[140px]">
+                        {model.description}
+                      </span>
+                    )}
+                    {model.contextLength && (
+                      <span className="text-xs text-txt-muted">
+                        {model.contextLength.toLocaleString()} ctx
+                      </span>
+                    )}
+                  </div>
                   {model.tier && (
-                    <span className="ml-2 text-xs px-1.5 py-0.5 rounded bg-surface-hover text-txt-muted">
+                    <span className="ml-2 text-xs px-1.5 py-0.5 rounded bg-surface-hover text-txt-muted flex-shrink-0">
                       {model.tier}
                     </span>
                   )}
