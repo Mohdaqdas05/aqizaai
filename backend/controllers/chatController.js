@@ -214,4 +214,14 @@ const sendMessage = async (req, res) => {
   }
 };
 
-module.exports = { getChats, createChat, getChat, deleteChat, updateChatTitle, sendMessage };
+const deleteAllChats = async (req, res) => {
+  try {
+    await query('DELETE FROM chats WHERE user_id = $1', [req.user.id]);
+    return res.json({ message: 'All chats deleted' });
+  } catch (err) {
+    console.error('deleteAllChats error:', err);
+    return res.status(500).json({ error: 'Failed to delete chats' });
+  }
+};
+
+module.exports = { getChats, createChat, getChat, deleteChat, updateChatTitle, sendMessage, deleteAllChats };
