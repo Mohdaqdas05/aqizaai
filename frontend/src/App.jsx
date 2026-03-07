@@ -11,6 +11,7 @@ import Register from './pages/Register'
 import AuthCallback from './pages/AuthCallback'
 import Dashboard from './pages/Dashboard'
 import Admin from './pages/Admin'
+import Settings from './pages/Settings'
 import NotFound from './pages/NotFound'
 
 export default function App() {
@@ -37,6 +38,14 @@ export default function App() {
                 element={
                   <ProtectedRoute adminOnly>
                     <Admin />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/settings"
+                element={
+                  <ProtectedRoute>
+                    <Settings />
                   </ProtectedRoute>
                 }
               />
