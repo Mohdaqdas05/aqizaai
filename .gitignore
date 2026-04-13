@@ -6,12 +6,17 @@ node_modules/
 dist/
 build/
 .next/
+out/
 
 # Environment files
 .env
 .env.local
 **/.env
 **/.env.local
+
+# Prisma
+prisma/dev.db
+prisma/dev.db-journal
 
 # Logs
 *.log
@@ -32,3 +37,7 @@ Thumbs.db
 # Lock files (keep package-lock.json)
 yarn.lock
 pnpm-lock.yaml
+
+# TypeScript
+*.tsbuildinfo
+next-env.d.ts
