@@ -69,8 +69,8 @@ export default function ChatPage() {
         const data = await res.json();
         setConversations(data);
       }
-    } catch {
-      console.error("Failed to fetch conversations");
+    } catch (error) {
+      console.error("Failed to fetch conversations:", error);
     }
   };
 
@@ -205,8 +205,8 @@ export default function ChatPage() {
           router.push("/");
         }
       }
-    } catch {
-      console.error("Failed to delete conversation");
+    } catch (error) {
+      console.error("Failed to delete conversation:", error);
     }
   };
 

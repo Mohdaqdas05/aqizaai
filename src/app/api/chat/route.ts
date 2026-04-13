@@ -85,8 +85,8 @@ export async function POST(request: Request) {
           where: { id: convId },
           data: { updatedAt: new Date() },
         });
-      } catch {
-        console.error("Failed to save assistant message");
+      } catch (error) {
+        console.error("Failed to save assistant message:", error);
       }
     });
 

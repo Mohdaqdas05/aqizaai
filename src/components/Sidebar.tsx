@@ -54,13 +54,6 @@ export default function Sidebar({
         <div
           className="sidebar-overlay"
           onClick={onToggle}
-          style={{ display: "none" }}
-          ref={(el) => {
-            // Show overlay only on mobile
-            if (el && window.innerWidth <= 768) {
-              el.style.display = "block";
-            }
-          }}
         />
       )}
       <aside className={`sidebar ${!isOpen ? "sidebar-hidden" : ""}`}>

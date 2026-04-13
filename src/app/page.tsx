@@ -48,8 +48,8 @@ export default function HomePage() {
         const data = await res.json();
         setConversations(data);
       }
-    } catch {
-      console.error("Failed to fetch conversations");
+    } catch (error) {
+      console.error("Failed to fetch conversations:", error);
     }
   };
 
@@ -193,8 +193,8 @@ export default function HomePage() {
       if (res.ok) {
         setConversations((prev) => prev.filter((c) => c.id !== id));
       }
-    } catch {
-      console.error("Failed to delete conversation");
+    } catch (error) {
+      console.error("Failed to delete conversation:", error);
     }
   };
 

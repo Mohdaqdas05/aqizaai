@@ -841,6 +841,10 @@ textarea {
 }
 
 /* --- Responsive --- */
+.sidebar-overlay {
+  display: none;
+}
+
 @media (max-width: 768px) {
   .sidebar {
     position: fixed;
@@ -855,6 +859,7 @@ textarea {
   }
 
   .sidebar-overlay {
+    display: block;
     position: fixed;
     inset: 0;
     background: rgba(0, 0, 0, 0.5);
