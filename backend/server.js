@@ -101,7 +101,10 @@ const shutdown = (signal) => {
     process.exit(0);
   });
   // Force exit after 10 s
-  setTimeout(() => process.exit(1), 10000);
+  setTimeout(() => {
+    console.error('Forced shutdown after timeout');
+    process.exit(1);
+  }, 10000);
 };
 
 process.on('SIGTERM', () => shutdown('SIGTERM'));
