@@ -233,7 +233,7 @@ const me = async (req, res) => {
 
 const updateProfile = async (req, res) => {
   try {
-    const { name, avatar_url } = req.body;
+    const { name, avatar_url, currentPassword, newPassword } = req.body;
     const updates = [];
     const values  = [];
     let idx = 1;
@@ -245,6 +245,25 @@ const updateProfile = async (req, res) => {
     if (avatar_url !== undefined) {
       updates.push(`avatar_url = $${idx++}`);
       values.push(avatar_url);
+    }
+
+    // Password change: verify current password, then hash new one
+    if (newPassword !== undefined) {
+      if (!currentPassword) {
+        return res.status(400).json({ error: 'Current password is required' });
+      }
+      const userResult = await query('SELECT password_hash FROM users WHERE id = $1', [req.user.id]);
+      const userRow = userResult.rows[0];
+      if (!userRow || !userRow.password_hash) {
+        return res.status(400).json({ error: 'Password change not available for this account' });
+      }
+      const isValid = await bcrypt.compare(currentPassword, userRow.password_hash);
+      if (!isValid) {
+        return res.status(400).json({ error: 'Current password is incorrect' });
+      }
+      const newHash = await bcrypt.hash(newPassword, SALT_ROUNDS);
+      updates.push(`password_hash = $${idx++}`);
+      values.push(newHash);
     }
 
     if (updates.length === 0) {
@@ -267,4 +286,62 @@ const updateProfile = async (req, res) => {
   }
 };
 
-module.exports = { register, login, googleCallback, refresh, logout, me, updateProfile };
+const updateSettings = async (req, res) => {
+  try {
+    const { theme, language, notifications_enabled, memory_enabled } = req.body;
+    const columns = [];
+    const values = [];
+    let idx = 1;
+
+    if (theme !== undefined)                  { columns.push({ col: 'theme',                  val: theme }); }
+    if (language !== undefined)               { columns.push({ col: 'language',               val: language }); }
+    if (notifications_enabled !== undefined)  { columns.push({ col: 'notifications_enabled',  val: notifications_enabled }); }
+    if (memory_enabled !== undefined)         { columns.push({ col: 'memory_enabled',         val: memory_enabled }); }
+
+    if (columns.length === 0) {
+      return res.status(400).json({ error: 'No settings to update' });
+    }
+
+    columns.forEach(({ val }) => values.push(val));
+    const setClauses      = columns.map(({ col }) => `${col} = $${idx++}`).join(', ');
+    const colNames        = columns.map(({ col }) => col).join(', ');
+    const valPlaceholders = columns.map((_, i) => `$${i + 1}`).join(', ');
+
+    values.push(req.user.id); // $idx = user_id
+    await query(
+      `INSERT INTO user_settings (user_id, ${colNames})
+       VALUES ($${idx}, ${valPlaceholders})
+       ON CONFLICT (user_id) DO UPDATE SET ${setClauses}, updated_at = NOW()`,
+      values
+    );
+
+    const result = await query(
+      `SELECT u.*, s.theme, s.language, s.notifications_enabled, s.memory_enabled
+       FROM users u LEFT JOIN user_settings s ON s.user_id = u.id
+       WHERE u.id = $1`,
+      [req.user.id]
+    );
+    return res.json({ message: 'Settings updated', data: safeUser(result.rows[0]) });
+  } catch (err) {
+    console.error('updateSettings error:', err);
+    return res.status(500).json({ error: 'Failed to update settings' });
+  }
+};
+
+const deleteAccount = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    // Delete related data in dependency order before removing the user
+    await query('DELETE FROM user_settings WHERE user_id = $1', [userId]);
+    await query('DELETE FROM refresh_tokens WHERE user_id = $1', [userId]);
+    await query('DELETE FROM chats WHERE user_id = $1', [userId]);
+    await query('DELETE FROM users WHERE id = $1', [userId]);
+    res.clearCookie('refreshToken', { path: '/api/auth' });
+    return res.json({ message: 'Account deleted' });
+  } catch (err) {
+    console.error('deleteAccount error:', err);
+    return res.status(500).json({ error: 'Failed to delete account' });
+  }
+};
+
+module.exports = { register, login, googleCallback, refresh, logout, me, updateProfile, updateSettings, deleteAccount };
