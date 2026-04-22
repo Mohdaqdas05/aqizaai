@@ -15,7 +15,7 @@ import {
   Sun,
   Moon,
   LogOut,
-  User,
+  Code2,
   MoreHorizontal,
 } from 'lucide-react'
 import { useLocalStorage } from '../hooks/useLocalStorage'
@@ -50,6 +50,7 @@ function Tooltip({ label, children, disabled }) {
 }
 
 const NAV_ITEMS = [
+  { icon: Code2,   label: 'Codex'    },
   { icon: Image,   label: 'Images'   },
   { icon: Grid2x2, label: 'Apps'     },
   { icon: Folder,  label: 'Projects' },
